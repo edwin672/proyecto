@@ -13,7 +13,7 @@ entity mensaje_memoria is
            dato_leer : out INTEGER;
 		   indice :in  INTEGER);
 end mensaje_memoria;
-
+ 
 architecture Behavioral of mensaje_memoria is
     type memoria_array is array (0 to 99) of INTEGER;
     type memoria_mensajes is array (0 to 3) of memoria_array;
