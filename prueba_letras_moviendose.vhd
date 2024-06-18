@@ -61,11 +61,12 @@ architecture Behavioral of led_blink is
 	signal mensajes : memoria_mensajes := (others => (others => 0));
 	signal mensaje_moviendose : memoria_array := (others => 0);
 	signal contador_posi : integer := 0;
+	signal contador_fila : integer := 0;
 	
-	type fila is array (7 downto 0) of std_logic;
-	type filas_mensaje is array (0 to 99) of fila;	
-	
-	signal filas_moviendose  : filas_mensaje;
+	 type fila is array (0 to 99) of std_logic_vector(7 downto 0);
+
+    -- Declaración de la señal
+    signal filas_moviendose : fila;
 
 component ROM_C is port(
 	clk: in std_logic;
@@ -110,32 +111,39 @@ end process;
 -------------------------------------relojs----------------------------------
 mensajes(0)(0) <= 0;
 mensajes(0)(1) <= 8;
-mensajes(0)(2) <= 16;
 --mensaje declarado que muestre A B C
+
 process(clk_cols, clk_0) 
 begin 
 
 if rising_edge(clk_cols) then
-	if(empezar = '1') then	
-		
-		direccion <= mensajes(0)(contador_posi) + row_counter;            
+	if(empezar = '1') then			
+		direccion <= row_counter+ mensajes(0)(contador_posi);
+		filas_moviendose(row_counter*mensajes(0)(contador_posi)) <= leido_rom; 		
 		MatrizRow <= leido_rom; 
-		
+		if rising_edge(clk_0) then
+			if(contador_fila = ((3*8)-1)) then
+				contador_fila <= 0;
+			else
+				contador_fila <= contador_fila +1;
+			end if;
+		filas_moviendose(0) <= leido_rom;
+			if(contador_posi = 2) then
+				contador_posi  <= 0;
+			else
+				contador_posi <= contador_posi +1;
+			end if;
+		end if;
+	
+	
 	end if;
 	if(empezar = '0')then
 		MatrizRow <= "00000000"; 
 	end if;
-	if rising_edge (clk_0) then
-		if(contador_posi = 3) then
-			contador_posi <= 0;
-		else
-			contador_posi <= contador_posi +1;
-		end if;
-	end if;
+	
 end if;
-
 end process;
-process(clk_cols)
+process(clk_cols,clk_0)
 begin
     if rising_edge(clk_cols) then
         case current_col is
@@ -194,11 +202,12 @@ begin
         end if;
 
         if empezar = '1' then 
-            if row_counter = 7 then
-                row_counter <= 0;
-            else
-                row_counter <= row_counter + 1; 
-            end if;
+				if row_counter = 7 then
+					row_counter <= 0;
+				else
+					row_counter <= row_counter + 1; 
+				end if;
+			
             MatrizCol <= MatrizCol(0) & MatrizCol(15 downto 1);
              
         end if;
