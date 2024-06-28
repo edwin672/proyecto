@@ -38,6 +38,9 @@ architecture a_ROM of ROM is
 	constant OP_COMP2: std_logic_vector(5 downto 0):= "010100";
 	constant OP_JMP: std_logic_vector(5 downto 0):=   "010101";
 	constant OP_JALR: std_logic_vector(5 downto 0):=  "010110";
+	--intruccion leerTeclado OP_READT
+	constant OP_READT: std_logic_vector(5 downto 0):= "010111";
+
 
 	--Control RPG
 	constant RPG_A: std_logic_vector(1 downto 0):= "00";
@@ -105,6 +108,9 @@ architecture a_ROM of ROM is
 		78 => OP_DIVI&RPG_B&"000000001010"&"1110", --DIVI RB, 10 RES=W/10
 		79 => OP_SUB&RPG_B&RPG_C&"0000000000"&"0111", --SUB RB - RC, RB=W/10 - 7*Z
 		80 => OP_SUB&RPG_B&RPG_A&"0000000000"&"0111", --SUB RB - RA, RB RES= W/10 - 7*Z - X^3
+
+		--Instruccion para leer una entrada del teclado matricial y guardarla en el registro A
+		95 => OP_READT&"00"&"0000000000000000", --READT RA
 
 		--Ecuacion d) desplegar 0000 en el display
 		246 => x"000012",-- 3 en decimal i

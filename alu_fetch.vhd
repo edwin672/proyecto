@@ -185,7 +185,8 @@ Multiplexor : MultiplexorGeneral port map(S0,S1,PC_multiplexor);
 						when "010011" =>instruction <= i_comp1;
 						when "010100" =>instruction <= i_comp2;
 						when "010101" =>instruction <= i_jmp;
-						when "010110" =>instruction <= i_jalr;		
+						when "010110" =>instruction <= i_jalr;
+						when "010111" =>instruction <= i_readt; --instruccion de leer del teclado		
 						when others =>
 							instruction <= i_null;
 					end case;
