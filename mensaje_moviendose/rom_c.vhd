@@ -3,15 +3,15 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-entity ROM_caracteres is port(
+entity rom_c is port(
 	clk: in std_logic;
 	enable: in std_logic;
 	address: in integer range 0 to 512; --Direccion de entrada en entero
 	data : out std_logic_vector(7 downto 0) --Columna de la matriz de leds
 );
-end ROM_caracteres;
+end rom_c;
 
-architecture caracteres of ROM_caracteres is
+architecture caracteres of rom_c is
 	type rom_type is array (0 to 512) of std_logic_vector(7 downto 0);
 	signal rom_memory : rom_type := (
 				

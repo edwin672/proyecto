@@ -11,7 +11,7 @@ entity led_blink is
         LED : out STD_LOGIC;
         ROW : in STD_LOGIC_VECTOR(3 downto 0);
         COL : out STD_LOGIC_VECTOR(3 downto 0);
-        MatCol : out STD_LOGIC_VECTOR(7 downto 0);
+        MatCol : out STD_LOGIC_VECTOR(15 downto 0);
         MatRow : out STD_LOGIC_VECTOR(7 downto 0)
     );
 end led_blink;
@@ -29,8 +29,8 @@ architecture Behavioral of led_blink is
     signal clk : std_logic := '0';
     signal count : integer range 0 to 4000000; 
 
-    constant MAX_COUNT2 : integer := 6000;
-    signal count_cols: integer range 0 to 6000;
+    constant MAX_COUNT2 : integer := 4000;
+    signal count_cols: integer range 0 to 4000;
     signal clk_cols : std_logic := '0';
 
     signal clk_0 : std_logic := '0';
@@ -45,7 +45,7 @@ architecture Behavioral of led_blink is
     signal prueba : std_logic := '0';
 
     signal MatrizRow : STD_LOGIC_VECTOR(7 downto 0) := "00000000";
-    signal MatrizCol : STD_LOGIC_VECTOR(7 downto 0) := "01111111";
+    signal MatrizCol : STD_LOGIC_VECTOR(15 downto 0) := "0111111111111111";
     type matrix_array is array (0 to 7) of STD_LOGIC_VECTOR(7 downto 0);
     
 
@@ -56,18 +56,56 @@ architecture Behavioral of led_blink is
 	signal parar : std_logic := '0';
 	signal leido_rom : std_logic_vector(7 downto 0):= (others => '0');
 	signal direccion : integer range 0 to 512;
+	type memoria_array is array (0 to 99) of INTEGER;
+	type memoria_mensajes is array (0 to 3) of memoria_array;
+	signal mensajes : memoria_mensajes := (others => (others => 0));
+	signal mensaje_moviendose : memoria_array := (others => 0);
+	signal contador_posi : integer := 0;
 	
+	
+	type data_tipo is array (0 to 15) of std_logic_vector(7 downto 0);
+signal data_prueba : data_tipo := (
+    -- A
+	0 => "00000000",
+    1 => "00000000",
+	2 => "11111000",
+    3 => "00010100",
+    4 => "00010010",
+    5 => "00010100",
+    6 => "11111000",
+    7 => "00000000",
+    -- B
+	8 => "00000000",
+    9 => "00000000",
+	10 =>  "11111110",
+    11 =>  "10010010",
+    12 => "10010010",
+    13 => "10010010",
+    14 => "01101100",
+    15 => "00000000"
+);
+	signal filasaux : std_logic_vector(7 downto 0);
+	
+	signal contador_filas : integer := 0;
+	signal listo : std_logic := '0';
+	signal filas_moviendose  : data_tipo;
+	signal contador_copia: integer := 0;
 component ROM_C is port(
 	clk: in std_logic;
 	enable: in std_logic;
 	address: in integer range 0 to 512; --Direccion de entrada en entero
 	data : out std_logic_vector(7 downto 0) --Columna de la matriz de leds
+	
 );
 end component;
+
 begin
 
 OSCinst0: OSCH generic map("26.60") port map('0', clk);
 rom : ROM_C port map(clk_cols,'1',direccion,leido_rom);
+
+
+
 
 process(clk)
 begin
@@ -91,8 +129,57 @@ begin
             clk_0 <= not clk_0;
         end if;
     end if;
-end process;
+end process; 
 -------------------------------------relojs----------------------------------
+mensajes(0)(0) <= 0; 
+mensajes(0)(1) <= 8;
+mensajes(0)(2) <= 16;
+--mensaje declarado que muestre A B C
+process(clk_cols) 
+begin 
+	if(listo = '0') then
+		if(rising_edge(clk_cols)) then
+		filas_moviendose(contador_copia) <= data_prueba(contador_copia);
+			if(contador_copia = 15) then
+				listo <= '1';
+				contador_copia <= 0;
+			else
+				contador_copia <= contador_copia +1;
+			end if;
+		end if;
+	end if;
+end process;
+process(clk_cols,listo)
+begin
+	if(listo = '1') then
+		if(rising_edge(clk_cols)) then
+			MatrizCol <= MatrizCol(14 downto 0) &MatrizCol(15);
+			MatrizRow <= data_prueba(contador_filas);
+			
+			if(contador_filas = 15) then
+				contador_filas <= 0;
+			else
+				contador_filas  <= contador_filas  +1;
+			end if;
+		end if;
+	end if;
+end process;
+process(clk_cols)
+begin
+    if rising_edge(clk_0) then
+        -- Copiar el primer elemento de data_prueba a filasaux
+        filasaux <= data_prueba(0);
+
+        -- Realizar el desplazamiento hacia la izquierda
+        for b in 0 to 14 loop
+            data_prueba(b) <= data_prueba(b + 1);
+        end loop;
+
+        -- Colocar filasaux en la última posición
+        data_prueba(15) <= filasaux;
+    end if;
+end process;
+
 
 process(clk_cols)
 begin
@@ -139,8 +226,7 @@ begin
                 COL <= "0001";
                 if ROW(0) = '1' then 
                     row_counter <= 0;
-                    empezar <= '1';                    
-                    MatrizCol <= "01111111";
+                    empezar <= '1';                 
                 end if;
             when others =>
                 parar <= '1';
@@ -152,18 +238,7 @@ begin
             current_col <= current_col + 1;
         end if;
 
-        if empezar = '1' then 
-            if row_counter = 7 then
-                row_counter <= 0;
-            else
-                row_counter <= row_counter + 1; 
-            end if;
-            direccion <= key_detected + row_counter;            
-            MatrizRow <= leido_rom; 
-            MatrizCol <= MatrizCol(0) & MatrizCol(7 downto 1);
-        else
-            MatrizRow <= "00000000"; 
-        end if;
+        
     end if;
 end process;
 
