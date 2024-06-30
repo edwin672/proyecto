@@ -16,12 +16,12 @@ entity alu_fetch is port(
 architecture behavior of alu_fetch is  ----------OSCILADOR INTERNO- -------------- ---- ------------ 
     component OSCH
         generic (NOM_FREQ: string);        
-        port (STDBY: in std_logic; OSC: out std_logic);           
-    end component;               
-             
+        port (STDBY: in std_logic; OSC: out std_logic);            
+    end component;                
+               
     attribute NOM_FREQ: string;              
-    attribute NOM_FREQ of OSCinst0: label is "26.60";  --- - -------- ----  --- -- -------------------------------------      
-    
+    attribute NOM_FREQ of OSCinst0: label is "26.60";  --- - -------- ----  -  -- -- -------------------------------------      
+      
 	component ROM_C is port(           
 		clk: in std_logic;   
 		enable: in std_logic;    
@@ -90,7 +90,7 @@ signal direccion : integer range 0 to 512;
 type global_state_type is (reset_pc,fetch,fetch1,fetch2,fetch3,end_fetch,decode,end_decode, execute,end_execute); 
 signal global_state: global_state_type;
 
-type instruction_type is (i_readt2,i_readme,i_readra,i_readm,i_readt,i_nop,i_load,i_addi,i_dply,i_adec,i_bnz,i_jump,i_bz,i_bs,i_null,i_bnc,i_bc,i_bnv,i_bv,i_halt,i_add,i_sub,i_mult,i_div,i_multi,i_divi,i_comp1,i_comp2,i_jmp,i_jalr);
+type instruction_type is (i_fillme,i_readt2,i_readme,i_readra,i_readm,i_readt,i_nop,i_load,i_addi,i_dply,i_adec,i_bnz,i_jump,i_bz,i_bs,i_null,i_bnc,i_bc,i_bnv,i_bv,i_halt,i_add,i_sub,i_mult,i_div,i_multi,i_divi,i_comp1,i_comp2,i_jmp,i_jalr);
 
 signal instruction: instruction_type;
 
@@ -105,7 +105,7 @@ type data_rom is array (0 to 207) of std_logic_vector(7 downto 0);
 signal data_rom_completa : data_rom := (
 	--A
 	0 => "00000000",
-	1 => "11111110",
+	1 => "00000000",
 	2 => "11111000",
 	3 => "00010100",
 	4 => "00010010",
@@ -113,256 +113,121 @@ signal data_rom_completa : data_rom := (
 	6 => "11111000",
 	7 => "00000000",
 	-- B
-	8 => "11111100",
+	8 => "00000000",
 	9 => "00000000",
-	10 =>  "11111110",
-	11 =>  "10010010",
+	10 => "11111110",
+	11 => "10010010",
 	12 => "10010010",
 	13 => "10010010",
 	14 => "01101100",
 	15 => "00000000",
 					
 	--C
-	16 => "10000010",
-	17 => "10000010",
-	18 => "10000010",
+	16 => "00000000",
+	17 => "00000000",
+	18 => "11111110",
 	19 => "10000010",
-	20 => "00000000",
-	21 => "00000000",
-	22 => "00000000",
-	23 => "11111110",
-		
-		--D
-		24 => "10000010",
-	25 => "10000010",
-	26 => "10000010",
-	27 => "01111100",
-	28 => "00000000",
-	29 => "00000000",
-	30 => "00000000",
-	31 => "11111110",
-		--E
-		32 => "10010010",
-	33 => "10010010",
-	34 => "10010010",
+	20 => "10000010",
+	21 => "10000010",
+	22 => "10000010",
+	23 => "00000000",
+	
+	--D
+	24 => "00000000",
+	25 => "00000000",
+	26 => "11111110",
+	27 => "10000010",
+	28 => "10000010",
+	29 => "10000010",
+	30 => "01111100",
+	31 => "00000000",
+
+	--E
+	32 => "00000000",
+	33 => "00000000",
+	34 => "11111110",
 	35 => "10010010",
-	36 => "00000000",
-	37 => "00000000",
-	38 => "00000000",
-	39 => "11111110",
-		--F				
-		40 => "00010010",
-	41 => "00010010",
-	42 => "00000010",
-	43 => "00000010",
-	44 => "00000000",
-	45 => "00000000",
+	36 => "10010010",
+	37 => "10010010",
+	38 => "10000010",
+	39 => "00000000",
+
+	--F
+	40 => "00000000",
+	41 => "00000000",
+	42 => "11111110",
+	43 => "00001010",
+	44 => "00001010",
+	45 => "00001010",
 	46 => "00000000",
-	47 => "11111110",
-		--G
-	48 => "10000010",
-	49 => "10010010",
-	50 => "10010010",
-	51 => "11110010",
-	52 => "00000000",
-	53 => "00000000",
-	54 => "00000000",
-	55 => "11111110",
-		--H
-		56 => "00010000",
-	57 => "00010000",
-	58 => "00010000",
-	59 => "11111110",
-	60 => "00000000",
-	61 => "00000000",
-	62 => "00000000",
-	63 => "11111110",
-		--I
-		64 => "10000010",
-	65 => "11111110",
+	47 => "00000000",
+
+	--G
+	48 => "00000000",
+	49 => "00000000",
+	50 => "01111100",
+	51 => "10000010",
+	52 => "10000010",
+	53 => "10010010",
+	54 => "01110010",
+	55 => "00000000",
+
+	--H
+	56 => "00000000",
+	57 => "00000000",
+	58 => "11111110",
+	59 => "00010000",
+	60 => "00010000",
+	61 => "00010000",
+	62 => "11111110",
+	63 => "00000000",
+
+	--I
+	64 => "00000000",
+	65 => "00000000",
 	66 => "10000010",
 	67 => "10000010",
-	68 => "00000000",
-	69 => "00000000",
-	70 => "00000000",
-	71 => "10000010",
-		--J
-	72 => "10000010",
-	73 => "11111110",
-	74 => "00000010",
-	75 => "00000010",
-	76 => "00000000",
-	77 => "00000000",
-	78 => "00000000",
-	79 => "10000010",
-		--K
-		80 => "00010000",
-	81 => "00101000",
-	82 => "01000100",
-	83 => "10000010",
-	84 => "00000000",
-	85 => "00000000",
-	86 => "00000000",
-	87 => "11111110",
-		--L
-		88 => "10000000",
-	89 => "10000000",
-	90 => "10000000",
+	68 => "11111110",
+	69 => "10000010",
+	70 => "10000010",
+	71 => "00000000",
+
+	--J
+	72 => "00000000",
+	73 => "00000000",
+	74 => "01100000",
+	75 => "10000000",
+	76 => "10000000",
+	77 => "10000000",
+	78 => "11111110",
+	79 => "00000000",
+
+	--K
+	80 => "00000000",
+	81 => "00000000",
+	82 => "11111110",
+	83 => "00010000",
+	84 => "00101000",
+	85 => "01000100",
+	86 => "10000010",
+	87 => "00000000",
+
+	--L
+	88 => "00000000",
+	89 => "00000000",
+	90 => "11111110",
 	91 => "10000000",
-	92 => "00000000",
-	93 => "00000000",
-	94 => "00000000",
-	95 => "11111110",
-		--M
-	96 => "00000100",
-	97 => "00001000",
-	98 => "00000100",
-	99 => "11111110",
-	100 => "00000000",
-	101 => "00000000",
-	102 => "00000000",
-	103 => "11111110",
-		--N
-		104 => "00001100",
-	105 => "00111000",
-	106 => "01100000",
-	107 => "11111110",
-	108 => "00000000",
-	109 => "00000000",
-	110 => "00000000",
-	111 => "11111110",
-		--O
-		112 => "10000010",
-	113 => "10000010",
-	114 => "10000010",
-	115 => "11111110",
-	116 => "00000000",
-	117 => "00000000",
-	118 => "00000000",
-	119 => "11111110",
-		--P
-		120 => "00010010",
-	121 => "00010010",
-	122 => "00010010",
-	123 => "00001100",
-	124 => "00000000",
-	125 => "00000000",
-	126 => "00000000",
-	127 => "11111110",
-		--Q               
-		128 => "10000010",
-	129 => "10100010",
-	130 => "11000010",
-	131 => "11111110",
-	132 => "00000000",
-	133 => "00000000",
-	134 => "00000000",
-	135 => "11111110",
-		--R               
-		136 => "00010010",
-	137 => "00110010",
-	138 => "01010010",
-	139 => "10001100",
-	140 => "00000000",
-	141 => "00000000",
-	142 => "00000000",
-	143 => "11111110",
-		--S                
-		144 => "10010010",
-	145 => "10010010",
-	146 => "10010010",
-	147 => "11110110",
-	148 => "00000000",
-	149 => "00000000",
-	150 => "00000000",
-	151 => "11011110",
-		--T                
-		152 => "00000010",
-	153 => "11111110",
-	154 => "00000010",
-	155 => "00000010",
-	156 => "00000000",
-	157 => "00000000",
-	158 => "00000000",
-	159 => "00000010",
-		--U                
-		160 => "10000000",
-	161 => "10000000",
-	162 => "10000000",
-	163 => "11111110",
-	164 => "00000000",
-	165 => "00000000",
-	166 => "00000000",
-	167 => "11111110",
-		--V                
-		168 => "01110000",
-	169 => "10000000",
-	170 => "01110000",
-	171 => "00001110",
-	172 => "00000000",
-	173 => "00000000",
-	174 => "00000000",
-	175 => "00001110",
-		--W                
-		176 => "10000000",
-	177 => "01111110",
-	178 => "10000000",
-	179 => "01111110",
-	180 => "00000000",
-	181 => "00000000",
-	182 => "00000000",
-	183 => "01111110",
-		--X                
-		184 => "01101100",
-	185 => "00010000",
-	186 => "01101100",
-	187 => "11000110",
-	188 => "00000000",
-	189 => "00000000",
-	190 => "00000000",
-	191 => "11000110",
-		--Y                
-		192 => "00001100",
-	193 => "11110000",
-	194 => "00001100",
-	195 => "00000110",
-	196 => "00000000",
-	197 => "00000000",
-	198 => "00000000",
-	199 => "00000110",
-		--Z                
-		200 => "10100001",
-	201 => "10001001",
-	202 => "10000101",
-	203 => "10000011",
-	204 => "00000000",
-	205 => "00000000",
-	206 => "00000000",
-	207 => "11000001"
-);
+	92 => "10000000",
+	93 => "10000000",
+	94 => "10000000",
+	95 => "00000000",
+	others => "00000000"
+	);
+	
 
 
 
-signal data_prueba : data_tipo := ( 
-    --A
-	0 => "00000000",
-	1 => "00000000",
-	2 => "11111000",
-	3 => "00010100",
-	4 => "00110010",
-	5 => "00010100",
-	6 => "11111000",
-	7 => "00000000",
-	-- B
-	8 => "00000000",
-	9 => "00000000",
-	10 =>  "11111110",
-	11 =>  "10010010",
-	12 => "10010010",
-	13 => "10010010",
-	14 => "01101100",
-	15 => "00000000"
-);
+signal data_prueba : data_tipo := (others => "00000000");
 	signal filasaux : std_logic_vector(7 downto 0);
 	
 	signal contador_filas : integer := 0;
@@ -449,6 +314,7 @@ process(clk_0, reset)
 						when "011000" =>instruction <= i_readm;
 						when "011001" =>instruction <= i_readme;
 						when "011010" => instruction <= i_readt2;	 
+						when "011011" => instruction <= i_fillme;
 						when others =>
 							instruction <= i_null;
 					end case;
@@ -496,7 +362,7 @@ process(clk_0, reset)
 							
 					end case;
 						when i_readt2 =>
-						prueba2 <= '1';
+						
 						case execute_instruction is
 							when t0 =>
 								empezar <= '1';
@@ -541,6 +407,7 @@ process(clk_0, reset)
 							execute_instruction<=t0;
 						
 						when i_readm =>
+						empezar <= '1';
 						case execute_instruction is
 							when t0 =>
 								selector_data <= IR(3 downto 0);
@@ -603,11 +470,15 @@ process(clk_0, reset)
 									end case;
 								execute_instruction <= t2;
 							when t2 =>
-								if(PC = "00001111") then
-									PC <= "00000000";
+							if(key_detected = 60) then
+								PC <= "00000000";
+							else
+								if(PC = "100011") then
+									PC <= "00010100";
 								else
 									PC <= PC + '1';
 								end if;
+							end if;
 								execute_instruction <= t3; -- sincronizar data_bus
 							when t3 =>
 								execute_instruction <= t4;
@@ -673,7 +544,11 @@ process(clk_0, reset)
 									empezar <= '0';
 								else
 									if(PC = "00000011") then
-										PC <= "00000010";
+										if(key_detected = 70) then
+											PC <= "00000100";
+										else
+											PC <= "00000010";
+										end if;
 									else
 										PC <= PC + '1';
 									end if;									
@@ -682,7 +557,58 @@ process(clk_0, reset)
 								execute_instruction<=t0;
 								global_state<=end_execute;
 							end case;
-
+						when i_fillme =>
+						prueba2 <= '1';
+						 case execute_instruction is
+							when t0 =>
+								execute_instruction<=t1;
+							when t1 =>
+								case IR(3 downto 0) is
+									when "0000" =>
+										data_prueba(0) <= data_rom_completa(mensaje_enteros(0)+0);
+									when "0001" =>
+										data_prueba(1) <= data_rom_completa(mensaje_enteros(0)+1);
+									when "0010" =>
+										data_prueba(2) <= data_rom_completa(mensaje_enteros(0)+2);
+									when "0011" =>
+										data_prueba(3) <= data_rom_completa(mensaje_enteros(0)+3);
+									when "0100" =>
+										data_prueba(4) <= data_rom_completa(mensaje_enteros(0)+4);
+									when "0101" =>
+										data_prueba(5) <= data_rom_completa(mensaje_enteros(0)+5);
+									when "0110" =>
+										data_prueba(6) <= data_rom_completa(mensaje_enteros(0)+6);
+									when "0111" =>
+										data_prueba(7) <= data_rom_completa(mensaje_enteros(0)+7);
+									when "1000" =>
+										data_prueba(8) <= data_rom_completa(mensaje_enteros(1)+0);
+									when "1001" =>
+										data_prueba(9) <= data_rom_completa(mensaje_enteros(1)+1);
+									when "1010" =>
+										data_prueba(10) <= data_rom_completa(mensaje_enteros(1)+2);
+									when "1011" =>
+										data_prueba(11) <= data_rom_completa(mensaje_enteros(1)+3);
+									when "1100" =>
+										data_prueba(12) <= data_rom_completa(mensaje_enteros(1)+4);
+									when "1101" =>
+										data_prueba(13) <= data_rom_completa(mensaje_enteros(1)+5);
+									when "1110" =>
+										data_prueba(14) <= data_rom_completa(mensaje_enteros(1)+6);
+									when "1111" =>
+										data_prueba(15) <= data_rom_completa(mensaje_enteros(1)+7);
+									when others =>
+										data_prueba(0) <= data_rom_completa(mensaje_enteros(0));
+								end case;
+								execute_instruction<=t2;
+							when t2 =>
+								execute_instruction<=t3;
+							when t3 =>
+								execute_instruction<=t4;
+							when t4 =>
+								PC <= PC + '1';
+								execute_instruction<=t0;
+								global_state<=end_execute;
+							end case;						
 						when others =>
 							global_state<=end_execute;
 					end case;
@@ -707,37 +633,41 @@ process(clk_0, reset)
 						if ROW(0) = '1' then 
 							key_detected <= 80; -- Enter
 						elsif ROW(1) = '1' then 
-							key_detected <= 7; 
+							key_detected <= 56; 
 						elsif ROW(2) = '1' then 
-							key_detected <= 4; 
+							key_detected <= 32; 
 						elsif ROW(3) = '1' then 
-							key_detected <= 1;
+							key_detected <= 8;
 						end if;
 					when 1 =>
 						COL <= "0100";
 						if ROW(0) = '1' then 
 							key_detected <= 0; 
 						elsif ROW(1) = '1' then 
-							key_detected <= 8; 
+							key_detected <= 64; 
 						elsif ROW(2) = '1' then 
-							key_detected <= 5; 
+							key_detected <= 40; 
 						elsif ROW(3) = '1' then 
-							key_detected <= 2; 
+							key_detected <= 16; 
 						end if;
 					when 2 =>
 						COL <= "0010";
 						if ROW(0) = '1' then 
-							key_detected <= 9; 
+							key_detected <= 72; 
 						elsif ROW(1) = '1' then 
-							key_detected <= 6; 
+							key_detected <= 48; 
 						elsif ROW(2) = '1' then 
-							key_detected <= 3; 
+							key_detected <= 24; 
 						end if;
 					when 3 =>
 						COL <= "0001";
 						if ROW(0) = '1' then 
 							row_counter <= 0;
-							leido_teclado <= '1';                 
+							leido_teclado <= '1';
+						elsif ROW(3) = '1' then
+							key_detected <= 70;
+						elsif ROW(2) = '1' then
+							key_detected <= 60;             
 						end if;
 				end case;
 	

@@ -19,7 +19,7 @@ architecture a_ROM of rom_intrucciones is
 	constant OP_LOAD: std_logic_vector(5 downto 0):=  "000001"; 
 	constant OP_ADDI: std_logic_vector(5 downto 0):=  "000010"; 
 	constant OP_DPLY: std_logic_vector(5 downto 0):=  "000011";
-	constant OP_ADEC: std_logic_vector(5 downto 0):=  "000100";  
+	constant OP_ADEC: std_logic_vector(5 downto 0):=  "000100";   
 	constant OP_BNZ: std_logic_vector(5 downto 0):=   "000101";
 	constant OP_BZ: std_logic_vector(5 downto 0):=    "000110";
 	constant OP_BS: std_logic_vector(5 downto 0):=    "000111";
@@ -45,6 +45,9 @@ architecture a_ROM of rom_intrucciones is
 	--instruccion ler del registro de proposito general A
 	constant OP_README: std_logic_vector(5 downto 0):= "011001";
 	constant OP_READT2: std_logic_vector(5 downto 0):= "011010";
+	
+	--intruccion  llenar memoria de numeros enteros
+	constant OP_FILLME: std_logic_vector(5 downto 0):= "011011";
 	--Control RPG
 	constant RPG_A: std_logic_vector(1 downto 0):= "00";
 	constant RPG_B: std_logic_vector(1 downto 0):= "01";
@@ -64,22 +67,39 @@ architecture a_ROM of rom_intrucciones is
 		2 => OP_README & "000000000000000000",
 		3 => OP_README & "000000000000000001",
 
-		--0 => OP_READM & "000000000000000000",		
-		--1 => OP_READM & "000000000000000001",		
-		--2 => OP_READM & "000000000000000010",		
-		--3 => OP_READM & "000000000000000011",
-		--4 => OP_READM & "000000000000000100",
-		--5 => OP_READM & "000000000000000101",
-		--6 => OP_READM & "000000000000000110",
-		--7 => OP_READM & "000000000000000111",
-		--8 => OP_READM & "000000000000001000",
-		--9 => OP_READM & "000000000000001001",
-		--10 => OP_READM & "000000000000001010",
-		--11 => OP_READM & "000000000000001011",
-		--12 => OP_READM & "000000000000001100",
-		--13 => OP_READM & "000000000000001101",
-		--14 => OP_READM & "000000000000001110",
-		--15 => OP_READM & "000000000000001111",
+		4 => OP_FILLME & "000000000000000000",
+		5 => OP_FILLME & "000000000000000001",
+		6 => OP_FILLME & "000000000000000010",
+		7 => OP_FILLME & "000000000000000011",
+		8 => OP_FILLME & "000000000000000100",
+		9 => OP_FILLME & "000000000000000101",
+		10 => OP_FILLME & "000000000000000110",
+		11 => OP_FILLME & "000000000000000111",
+		12 => OP_FILLME & "000000000000001000",
+		13 => OP_FILLME & "000000000000001001",
+		14 => OP_FILLME & "000000000000001010", 
+		15 => OP_FILLME & "000000000000001011",
+		16 => OP_FILLME & "000000000000001100",
+		17 => OP_FILLME & "000000000000001101",
+		18 => OP_FILLME & "000000000000001110",
+		19 => OP_FILLME & "000000000000001111",
+
+		20 => OP_READM & "000000000000000000",		
+		21 => OP_READM & "000000000000000001",		
+		22 => OP_READM & "000000000000000010",		
+		23 => OP_READM & "000000000000000011",
+		24 => OP_READM & "000000000000000100",
+		25 => OP_READM & "000000000000000101",
+		26 => OP_READM & "000000000000000110",
+		27 => OP_READM & "000000000000000111",
+		28 => OP_READM & "000000000000001000",
+		29 => OP_READM & "000000000000001001",
+		30 => OP_READM & "000000000000001010",
+		31 => OP_READM & "000000000000001011",
+		32 => OP_READM & "000000000000001100",
+		33 => OP_READM & "000000000000001101",
+		34 => OP_READM & "000000000000001110",
+		35 => OP_READM & "000000000000001111",
 
 		--0 => OP_READT & "000000000000000000",		
 		--intruccion i load en RA
