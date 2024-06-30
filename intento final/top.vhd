@@ -17,12 +17,12 @@ architecture behavior of alu_fetch is  ----------OSCILADOR INTERNO- ------------
     component OSCH
         generic (NOM_FREQ: string);        
         port (STDBY: in std_logic; OSC: out std_logic);           
-    end component;              
+    end component;               
              
     attribute NOM_FREQ: string;              
-    attribute NOM_FREQ of OSCinst0: label is "26.60";  ---- -------- ----  --- -- -------------------------------------      
+    attribute NOM_FREQ of OSCinst0: label is "26.60";  --- - -------- ----  --- -- -------------------------------------      
     
-	component ROM_C is port(          
+	component ROM_C is port(           
 		clk: in std_logic;   
 		enable: in std_logic;    
 		address: in integer range 0 to 512; --Direccion de entrada en entero
@@ -644,6 +644,7 @@ process(clk_0, reset)
 
 						when i_readme => --leer la tecla que se almaceno en el array de mensajes
 						prueba2 <= '0';
+						empezar <= '1';
 							case execute_instruction is
 								when t0 =>									
 									--execute_instruction<=t1;	
@@ -667,13 +668,19 @@ process(clk_0, reset)
 								when t3 =>
 									execute_instruction<=t4;
 								when t4 =>
-								if(PC = "00000011") then
-									PC <= "00000010";
+								if(key_detected = 80) then
+									PC <= "00000000";
+									empezar <= '0';
 								else
-									PC <= PC + '1';
-								end if;									
-									execute_instruction<=t0;
-									global_state<=end_execute;
+									if(PC = "00000011") then
+										PC <= "00000010";
+									else
+										PC <= PC + '1';
+									end if;									
+								
+								end if;
+								execute_instruction<=t0;
+								global_state<=end_execute;
 							end case;
 
 						when others =>
