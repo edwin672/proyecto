@@ -10,21 +10,21 @@ entity alu_fetch is port(
 	ROW : in STD_LOGIC_VECTOR(3 downto 0);
     COL : out STD_LOGIC_VECTOR(3 downto 0);   
     MatCol : out STD_LOGIC_VECTOR(15 downto 0); 
-    MatRow : out STD_LOGIC_VECTOR(7 downto 0)     
-);end alu_fetch;   
+    MatRow : out STD_LOGIC_VECTOR(7 downto 0)      
+);end alu_fetch;    
    
 architecture behavior of alu_fetch is  ----------OSCILADOR INTERNO- -------------- ---- ------------ 
     component OSCH
-        generic (NOM_FREQ: string);        
-        port (STDBY: in std_logic; OSC: out std_logic);            
-    end component;                
-               
-    attribute NOM_FREQ: string;              
-    attribute NOM_FREQ of OSCinst0: label is "26.60";  --- - -------- ----  -  -- -- -------------------------------------      
-      
+        generic (NOM_FREQ: string);         
+        port (STDBY: in std_logic; OSC: out std_logic);              
+    end component;                    
+                  
+    attribute NOM_FREQ: string;                 
+    attribute NOM_FREQ of OSCinst0: label is "26.60";  ---  - -------- ----   -  -- -- -------------------------------------      
+          
 	component ROM_C is port(           
 		clk: in std_logic;   
-		enable: in std_logic;    
+		enable: in std_logic;     
 		address: in integer range 0 to 512; --Direccion de entrada en entero
 		data : out std_logic_vector(7 downto 0) --Columna de la matriz de leds
 	);	
@@ -45,12 +45,7 @@ signal clk_0: std_logic:='0';
 signal clk_1: std_logic:='0';
 signal clk_cols: std_logic:='0';
 signal clk_2: std_logic:='0';
-signal Q: std_logic_vector(13 downto 0);
-signal Qbcd: std_logic_vector(15 downto 0);
-signal temp_control: std_logic_vector(3 downto 0);
-signal un,de,ce,mi: std_logic_vector(6 downto 0);
-signal Rdisplay: std_logic_vector(13 downto 0);
---REGISTROS PARA DATAPATH--
+
 signal PC: std_logic_vector(7 downto 0):="00000000";
 signal MAR: std_logic_vector(7 downto 0):=(others=>'0');
 signal MBR: std_logic_vector(23 downto 0);
@@ -228,6 +223,7 @@ signal data_rom_completa : data_rom := (
 
 
 signal data_prueba : data_tipo := (others => "00000000");
+signal data_copiada : data_tipo := (others => "00000000");
 	signal filasaux : std_logic_vector(7 downto 0);
 	
 	signal contador_filas : integer := 0;
@@ -249,6 +245,10 @@ signal data_prueba : data_tipo := (others => "00000000");
 	signal select_mensajeguardado : std_logic_vector(1 downto 0) := "00";
 	signal leido_1: std_logic := '0';
 
+	signal empezar_copiar : std_logic := '0';
+	signal copiado : std_logic := '0';
+	signal mover : std_logic := '0';
+
 begin
 -----------IMPLEMENTACION OSCILADOR INTERNO---------------
 OSCinst0: OSCH generic map("26.60") port map('0', clk);
@@ -259,7 +259,7 @@ ROM_imp: rom_intrucciones port map(clk_0,reset,'1','1',MAR,data_bus);
 rom_catalogo : ROM_C port map(clk_cols,'1',direccion,leido_rom);
 
 
-process(clk_0, reset)
+process(clk_0, reset,clk_2)
 	begin
 		if (reset = '1') then
 			global_state <= reset_pc;
@@ -287,29 +287,6 @@ process(clk_0, reset)
 					global_state<=decode;
 				when decode =>
 					case IR(23 downto 18) is
-						when "000000" =>instruction <= i_nop;
-						when "000001" =>instruction <= i_load;
-						when "000010" =>instruction <= i_addi;
-						when "000011" =>instruction <= i_dply;
-						when "000100" =>instruction <= i_adec;
-						when "000101" =>instruction <= i_bnz;
-						when "000110" =>instruction <= i_bz;
-						when "000111" =>instruction <= i_bs;
-						when "001000" =>instruction <= i_bnc;
-						when "001001" =>instruction <= i_bc;
-						when "001010" =>instruction <= i_bnv;
-						when "001011" =>instruction <= i_bv;
-						when "001100" =>instruction <= i_halt;
-						when "001101" =>instruction <= i_add;
-						when "001110" =>instruction <= i_sub;
-						when "011111" =>instruction <= i_mult;
-						when "010000" =>instruction <= i_div;
-						when "010001" =>instruction <= i_multi;
-						when "010010" =>instruction <= i_divi;
-						when "010011" =>instruction <= i_comp1;
-						when "010100" =>instruction <= i_comp2;
-						when "010101" =>instruction <= i_jmp;
-						when "010110" =>instruction <= i_jalr;
 						when "010111" =>instruction <= i_readt; --instruccion de leer del teclado
 						when "011000" =>instruction <= i_readm;
 						when "011001" =>instruction <= i_readme;
@@ -324,7 +301,7 @@ process(clk_0, reset)
 					global_state<=execute;
 					
 				when execute => 
-				prueba2 <= '0';
+				
 					case instruction is		
 
 					when i_readt =>
@@ -399,79 +376,84 @@ process(clk_0, reset)
 								execute_instruction<=t0;
 						end case;
 
-						when i_nop =>
-						--PC <= 10 en binario
-							MatrizRow <= "00000000";
-							PC <= "00001001";
-							global_state<=end_execute;
-							execute_instruction<=t0;
 						
 						when i_readm =>
 						empezar <= '1';
 						case execute_instruction is
 							when t0 =>
-								selector_data <= IR(3 downto 0);
-								execute_instruction <= t1;
-							when t1 =>
+								selector_data <= IR(3 downto 0);								
+								if copiado = '1' then
+									execute_instruction <= t1;
+									
+								end if;
+								if(copiado = '0') then
+									empezar_copiar <= '1';
+									execute_instruction <= t0;
+								end if;
+								
+							when t1 =>							
+							--if(copiado = '1') then
 								case selector_data is
 									when "0000" =>
 										MatrizCol <= "1111111111111110";
 										--obtener el valor de data prueba en selecto data de 0000 a 1111 a intero
-										MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+										MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "0001"=>
 									MatrizCol <= "1111111111111101";
 									--obtener el valor de data prueba en selecto data de 0000 a 1111 a intero
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "0010"=>
 									MatrizCol <= "1111111111111011";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "0011"=>
 									MatrizCol <= "1111111111110111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "0100"=>
 									MatrizCol <= "1111111111101111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "0101"=>
 									MatrizCol <= "1111111111011111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "0110"=>
 									MatrizCol <= "1111111110111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "0111"=>
 									MatrizCol <= "1111111101111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1000"=>
 									MatrizCol <= "1111111011111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1001"=>
 									MatrizCol <= "1111110111111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1010"=>
 									MatrizCol <= "1111101111111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1011"=>
 									MatrizCol <= "1111011111111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1100"=>
 									MatrizCol <= "1110111111111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1101"=>
 									MatrizCol <= "1101111111111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1110"=>
 									MatrizCol <= "1011111111111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when "1111"=>
 									MatrizCol <= "0111111111111111";
-									MatrizRow <= data_prueba(to_integer(unsigned(selector_data)));
+									MatrizRow <= data_copiada(to_integer(unsigned(selector_data)));
 									when others =>
 										MatrizCol <= "1111111111111111";
 										MatrizRow <= "00000000";
 									end case;
 								execute_instruction <= t2;
+							--end if;
 							when t2 =>
 							if(key_detected = 60) then
 								PC <= "00000000";
+								empezar_copiar <= '0';
 							else
 								if(PC = "100011") then
 									PC <= "00010100";
@@ -487,32 +469,7 @@ process(clk_0, reset)
 								execute_instruction <= t0; 
 						end case;
 
-						when i_load =>
-							case execute_instruction is 
-								when t0 =>
-									execute_instruction<=t1;
-								when t1 =>
-									rpg_write<='1';
-									rpg_sel<=IR(17 downto 16); --RA
-									rpg_in<="000000000000000000000011"; --3
-									execute_instruction<=t2;
-								when t2 =>
-									execute_instruction<=t3;--sincronizar data_bus
-									--pasara a entero el valor de salida de rpg_out1
-									
-
-								when t3 =>									
-									execute_instruction<=t4;
-								when t4 =>
-									rpg_write<='0';
-									execute_instruction<=t0;
-									global_state<=end_execute;
-							end case;
-							
-						when i_jump =>
-							PC<=IR(7 downto 0);
-							global_state<=end_execute;
-
+						
 						when i_readme => --leer la tecla que se almaceno en el array de mensajes
 						prueba2 <= '0';
 						empezar <= '1';
@@ -622,7 +579,25 @@ process(clk_0, reset)
 		end if;
 	end process;
 
-	
+	process(clk_2) 
+	begin
+		if(rising_edge(clk_2)) then
+			if(empezar_copiar = '1') then		
+				data_copiada <= data_prueba;
+				copiado <= '1';
+				mover <= '1';
+			end if;
+			if(empezar_copiar = '0') then
+				copiado <= '0';
+				mover <= '0';
+			end if;
+			if(mover = '1') then
+				data_copiada <= data_copiada(1 to 15) & data_copiada(0);
+			end if;
+		end if;
+		
+		
+	end process;
 	process(clk_0)
 	begin
 		if rising_edge(clk_0) then
@@ -652,11 +627,11 @@ process(clk_0, reset)
 						end if;
 					when 2 =>
 						COL <= "0010";
-						if ROW(0) = '1' then 
+						if ROW(1) = '1' then 
 							key_detected <= 72; 
-						elsif ROW(1) = '1' then 
-							key_detected <= 48; 
 						elsif ROW(2) = '1' then 
+							key_detected <= 48; 
+						elsif ROW(3) = '1' then 
 							key_detected <= 24; 
 						end if;
 					when 3 =>
@@ -730,6 +705,6 @@ end process;
 
 MatRow <= MatrizRow; 
 MatCol <= MatrizCol;
-LED <= leido_teclado;-- rojp
-LED2 <= prueba2; --azul
+LED <= empezar_copiar;-- rojp
+LED2 <= mover; --azul
 end behavior;
