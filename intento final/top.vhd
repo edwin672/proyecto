@@ -21,14 +21,6 @@ architecture behavior of alu_fetch is  ----------OSCILADOR INTERNO- ------------
                   
     attribute NOM_FREQ: string;                 
     attribute NOM_FREQ of OSCinst0: label is "26.60";  ---  - -------- ----   -  -- -- -------------------------------------      
-          
-	component ROM_C is port(           
-		clk: in std_logic;   
-		enable: in std_logic;     
-		address: in integer range 0 to 512; --Direccion de entrada en entero
-		data : out std_logic_vector(7 downto 0) --Columna de la matriz de leds
-	);	
-	end component;
 
 	component rom_intrucciones is port(  
 		clk: in std_logic;
@@ -54,15 +46,7 @@ signal ACC: std_logic_vector(15 downto 0);
 
 --entradas,salidas componentes
 signal data_bus: std_logic_vector(23 downto 0);
-signal rpg_in: std_logic_vector(23 downto 0):=(others=>'0');
-signal rpg_out: std_logic_vector(23 downto 0);
-signal rpg_sel: std_logic_vector(1 downto 0):=(others=>'0');
-signal rpg_in2: std_logic_vector(23 downto 0):=(others=>'0');
-signal rpg_out2: std_logic_vector( 23 downto 0);
-signal rpg_sel2: std_logic_vector(1 downto 0):=(others=>'0');
-signal rpg_write: std_logic:='0';
 signal A,B: std_logic_vector(15 downto 0);
-signal control: std_logic_vector(3 downto 0);
 signal C,Z,S,V: std_logic;
 
 --entradas para el teclado
@@ -78,10 +62,6 @@ signal leido_teclado: std_logic := '0';
 
 signal prueba2: std_logic := '0';
 
---entradas rom de letras
-signal leido_rom : std_logic_vector(7 downto 0):= (others => '0');
-signal direccion : integer range 0 to 512;
-
 type global_state_type is (reset_pc,fetch,fetch1,fetch2,fetch3,end_fetch,decode,end_decode, execute,end_execute); 
 signal global_state: global_state_type;
 
@@ -92,10 +72,9 @@ signal instruction: instruction_type;
 type execute_instruction_type is(t0,t1,t2,t3,t4);
 signal execute_instruction: execute_instruction_type;
 
-signal PC_multiplexor : std_logic_vector(7 downto 0);
 type data_tipo is array (0 to 15) of std_logic_vector(7 downto 0);
 
-type data_rom is array (0 to 207) of std_logic_vector(7 downto 0);
+type data_rom is array (0 to 95) of std_logic_vector(7 downto 0);
 --variables para leer movido
 signal data_rom_completa : data_rom := (
 	--A
@@ -224,27 +203,10 @@ signal data_rom_completa : data_rom := (
 
 signal data_prueba : data_tipo := (others => "00000000");
 signal data_copiada : data_tipo := (others => "00000000");
-	signal filasaux : std_logic_vector(7 downto 0);
-	
-	signal contador_filas : integer := 0;
-	signal filas_moviendose  : data_tipo;
-	signal contador_copia: integer := 0;
-	signal fin_cadena : std_logic := '0';
 	type memoria_array is array (0 to 99) of INTEGER;
-	signal mensaje_enteros : memoria_array := (others => 0);
-	signal contador_caracteres : integer := 0;
-
-	signal rpg_sel1: std_logic_vector(1 downto 0):=(others=>'0');
-	signal rpg_out1: std_logic_vector(23 downto 0);
-
-	signal mostrar: std_logic := '0';
-	signal contador_mensaje: integer := 0;
-	signal mensaje_leido: std_logic_vector(7 downto 0) := "00000000";
+	signal mensaje_enteros : memoria_array := (others => 0);	
 	signal selector_data : std_logic_vector(3 downto 0) := "0000";
-	signal select_mensaje : std_logic_vector(1 downto 0) := "00";
-	signal select_mensajeguardado : std_logic_vector(1 downto 0) := "00";
-	signal leido_1: std_logic := '0';
-
+	signal select_mensaje : std_logic_vector(1 downto 0) := "00";		
 	signal empezar_copiar : std_logic := '0';
 	signal copiado : std_logic := '0';
 	signal mover : std_logic := '0';
